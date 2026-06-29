@@ -1,32 +1,10 @@
-# ── secrets & private state — NEVER commit ──────────────────────────────
-# Filled env files (the templates *.env.example are the only ones tracked)
-relay.env
-.env
-**/.env
-!**/.env.example
-# VAPID / TLS private keys
-*.pem
-*.key
-# Runtime data: the conversation DB and uploaded attachments are private
-relay.db
-relay.db-*
-uploads/
-inbox/
-last_in_id
-
-# ── build / deps ────────────────────────────────────────────────────────
-node_modules/
-bun.lock
-bun.lockb
-__pycache__/
-*.pyc
-venv/
-.venv/
-
-# ── editor / OS noise ───────────────────────────────────────────────────
+*.iml
+.gradle
+/local.properties
+/.idea
 .DS_Store
-Thumbs.db
-*.bak
-*.bak-*
-.idea/
-.vscode/
+/build
+/captures
+.externalNativeBuild
+.cxx
+/app/build

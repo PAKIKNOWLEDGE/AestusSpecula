@@ -1,6 +1,9 @@
 MIT License
 
-Copyright (c) 2026 Companion Channel contributors
+Copyright (c) 2026 Aestus Specula contributors
+
+PWA frontend (web/) is based on Tidal Echo (MIT), Copyright (c) 2026 Companion Channel contributors.
+Android backend (app/) is an independent implementation.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>相册 · Album Archive</title>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5/400.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5/500.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5/400-italic.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5/400.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5/500.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/pinyon-script@5/400.min.css" rel="stylesheet">
+<link rel="preload" href="chat-light.webp" as="image">
+<link rel="preload" href="al-board.png" as="image">
+<meta name="theme-color" content="#F7FAFC">
+
+<script>
+  /* Pearl (light) theme — matches the PWA's default preset. */
+  (function(){ document.documentElement.setAttribute("data-theme","light"); })();
+</script>
+
+<style>
+/* ───────── Pearl Tide · light theme (shared with the PWA) ───────── */
+:root{
+  --font-en:"Cormorant Garamond",Georgia,serif;
+  --font-cn:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --font-script:"Pinyon Script","Cormorant Garamond",cursive;
+
+  --bg:#F7FAFC;
+  --wall:url("chat-light.webp");
+  --text:#253447;
+  --text-soft:#5E7080;
+  --text-faint:#8A99A8;
+  --accent:#4C6378;
+  --accent-deep:#2C4056;
+  --hairline:rgba(120,142,165,.24);
+  --card-bg:rgba(248,251,253,.58);
+  --card-line:rgba(150,168,182,.22);
+  --field-bg:rgba(255,255,255,.55);
+  --field-line:rgba(255,255,255,.7);
+  --sheet-bg:rgba(252,253,255,.90);
+  --sheet-line:rgba(255,255,255,.85);
+  --sheet-hi:rgba(255,255,255,.7);
+  --sheet-scrim:rgba(44,60,78,.44);
+  --shadow:0 18px 46px rgba(74,93,108,.12);
+  --soft-shadow:0 10px 26px rgba(86,104,118,.10);
+  --photo-shadow:0 10px 24px rgba(54,76,96,.18);
+  --scrim:linear-gradient(180deg,rgba(255,255,255,.48),rgba(255,255,255,.16) 32%,rgba(255,255,255,.06) 66%,rgba(255,255,255,.30));
+  --danger:#b06a6f;
+  --peer-avatar:url("avatar-sea.png");
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--font-cn); font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  min-height:100vh; overflow-x:hidden;
+}
+.wall{ position:fixed; inset:0; z-index:-2; background:var(--bg) var(--wall) center/cover no-repeat; }
+.wall::after{ content:""; position:absolute; inset:0; background:var(--scrim); }
+img{ display:block; max-width:100%; }
+button{ font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
+.hidden{ display:none !important; }
+
+/* 主页同款毛玻璃柔光质感 */
+.glass{ background:var(--field-bg); border:1px solid var(--field-line);
+  box-shadow:var(--soft-shadow), inset 0 1px 0 var(--sheet-hi);
+  -webkit-backdrop-filter:blur(16px) saturate(1.25); backdrop-filter:blur(16px) saturate(1.25); }
+
+/* ───────── 顶栏：‹ 返回 + 右上 PHOTO ALBUM ───────── */
+.bar{
+  position:sticky; top:0; z-index:30; display:flex; align-items:flex-start; gap:6px;
+  padding:calc(8px + env(safe-area-inset-top)) clamp(16px,5vw,28px) 4px;
+  background:linear-gradient(180deg,rgba(247,250,252,.82),rgba(247,250,252,0));
+  -webkit-backdrop-filter:blur(12px) saturate(1.15); backdrop-filter:blur(12px) saturate(1.15);
+}
+.bar .icon{ width:36px; height:36px; margin-top:-3px; margin-left:-7px; display:grid; place-items:center; border-radius:50%;
+  color:var(--text); transition:background .2s,transform .15s; }
+.bar .icon:active{ transform:scale(.9); background:var(--hairline); }
+.bar .icon svg{ width:23px; height:23px; }
+.bar .grow{ flex:1; }
+.top-label{ text-align:right; font-family:var(--font-en); font-size:11.5px; font-weight:500;
+  letter-spacing:.32em; line-height:1.4; color:var(--text-faint); padding-right:2px; }
+.top-label .rule{ display:block; width:28px; height:1px; background:var(--hairline); margin:5px 0 0 auto; }
+
+.wrap{ max-width:560px; margin:0 auto; padding:0 clamp(16px,5vw,28px) calc(22px + env(safe-area-inset-bottom)); position:relative; z-index:1; }
+
+/* ───────── Hero 抬头（左对齐、紧凑） ───────── */
+.hero{ text-align:left; padding:2px 0 6px; }
+.hero h1{ font-family:var(--font-script); font-weight:400; color:var(--text);
+  font-size:clamp(33px,10.6vw,46px); line-height:1; margin:0; }
+.hero .sub{ font-family:var(--font-en); font-style:italic; font-size:clamp(13px,3.8vw,16px);
+  color:var(--text-soft); margin-top:0; letter-spacing:.01em; }
+
+/* ───────── 搜索 + Upload（窄小、浅色毛玻璃） ───────── */
+.tools{ display:flex; gap:9px; align-items:stretch; margin:9px 0 13px; }
+.search{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:0 13px; border-radius:24px; }
+.search svg{ width:15px; height:15px; color:var(--text-faint); flex:0 0 auto; }
+.search input{ flex:1; min-width:0; border:none; background:none; outline:none; color:var(--text);
+  font-family:var(--font-en); font-size:14px; padding:9px 0; }
+.search input::placeholder{ color:var(--text-faint); font-style:italic; }
+.up-btn{ flex:0 0 auto; display:flex; align-items:center; gap:6px; padding:0 14px; border-radius:24px;
+  color:var(--text); font-family:var(--font-en); font-size:13px; letter-spacing:.01em; transition:transform .15s; }
+.up-btn:active{ transform:scale(.96); }
+.up-btn svg{ width:14px; height:14px; color:var(--text-soft); }
+
+/* 区块小标题 */
+.sec-head{ display:flex; align-items:baseline; justify-content:space-between; margin:13px 2px 8px; }
+.sec-head h2{ font-family:var(--font-en); font-weight:500; font-size:17px; letter-spacing:.01em; margin:0; color:var(--text); }
+.sec-head .more{ font-family:var(--font-en); font-size:12.5px; font-style:italic; color:var(--text-soft); white-space:nowrap; }
+.sec-head .more:active{ opacity:.6; }
+
+/* ───────── board 照片墙：照片在底层，PNG 当上层压边（不露白边） ───────── */
+.board-zone{ position:relative; margin:0 -2px 2px; }
+.board{ position:relative; width:100%; aspect-ratio:1046/917; }
+.board-bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:2; pointer-events:none; }
+.pw-frame{ position:absolute; z-index:1; overflow:hidden; animation:popIn .5s both; }
+.pw-frame img{ width:100%; height:100%; object-fit:cover; background:var(--hairline); }
+.pw-draw{ position:absolute; left:1%; top:46.5%; width:32%; height:49%; z-index:3; border-radius:8px; transition:background .2s; }
+.pw-draw:active{ background:rgba(120,142,165,.14); }
+
+/* ───────── Recent Uploads：横排小正方圆角图 ───────── */
+.rail{ display:flex; gap:9px; overflow-x:auto; padding:2px 2px 3px; margin:0 -2px;
+  scrollbar-width:none; scroll-snap-type:x proximity; }
+.rail::-webkit-scrollbar{ display:none; }
+.r-item{ flex:0 0 auto; width:72px; height:72px; border-radius:14px; overflow:hidden; scroll-snap-align:start;
+  background:var(--hairline); box-shadow:var(--soft-shadow); transition:transform .2s; animation:popIn .5s both; }
+.r-item img{ width:100%; height:100%; object-fit:cover; }
+.r-item:active{ transform:scale(.95); }
+.dots{ display:flex; gap:5px; justify-content:center; margin:8px 0 2px; }
+.dot{ width:5px; height:5px; border-radius:50%; background:var(--hairline); transition:background .25s,width .25s; }
+.dot.on{ background:var(--accent); width:14px; border-radius:3px; }
+
+/* ───────── My Albums：横向圆角卡 ───────── */
+.albums{ display:flex; gap:10px; overflow-x:auto; padding:2px 2px 4px; margin:0 -2px; scrollbar-width:none; scroll-snap-type:x proximity; }
+.albums::-webkit-scrollbar{ display:none; }
+.album{ flex:0 0 auto; display:flex; align-items:center; gap:10px; width:186px; padding:8px; border-radius:16px;
+  scroll-snap-align:start; text-align:left; transition:transform .2s; }
+.album:active{ transform:scale(.97); }
+.album .cov{ width:52px; height:52px; border-radius:12px; overflow:hidden; background:var(--hairline); flex:0 0 auto; }
+.album .cov img{ width:100%; height:100%; object-fit:cover; }
+.album .txt{ min-width:0; }
+.album .txt b{ display:block; font-family:var(--font-cn); font-weight:500; font-size:14.5px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.album .txt span{ font-family:var(--font-en); font-size:12.5px; letter-spacing:.03em; color:var(--text-faint); }
+
+/* ───────── 全部 / 搜索结果：圆角无边框网格 ───────── */
+.rgrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px 14px; padding:4px 2px 0; }
+.rcard{ text-align:left; transition:transform .2s; animation:popIn .5s both; }
+.rcard:active{ transform:scale(.97); }
+.rcard .img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:16px; background:var(--hairline); box-shadow:var(--photo-shadow); }
+.rcard .cap{ font-family:var(--font-cn); font-size:13px; line-height:1.4; color:var(--text); margin:8px 3px 1px;
+  max-height:2.8em; overflow:hidden; }
+.rcard .meta{ font-family:var(--font-en); font-size:11.5px; letter-spacing:.03em; color:var(--text-faint); margin:0 3px;
+  display:flex; gap:8px; }
+
+/* 空态 / 加载 */
+.empty{ text-align:center; color:var(--text-soft); padding:34px 20px; }
+.empty .en{ font-family:var(--font-en); font-style:italic; font-size:18px; color:var(--text-faint); }
+.empty p{ font-family:var(--font-cn); font-size:13.5px; margin:8px 0 0; }
+.msg{ color:var(--danger); text-align:center; padding:14px; font-size:13.5px; }
+
+/* ───────── 详情（字号偏小、留白呼吸） ───────── */
+.detail{ padding-top:4px; }
+.detail .photo{ width:100%; max-height:54vh; object-fit:cover; border-radius:18px; background:var(--hairline); box-shadow:var(--photo-shadow); cursor:zoom-in; }
+.detail .author{ display:flex; align-items:center; gap:10px; margin:16px 2px 0; }
+.detail .author .av{ width:40px; height:40px; border-radius:50%; background:var(--bg) var(--peer-avatar) center/cover;
+  box-shadow:0 2px 8px rgba(40,60,80,.2); flex:0 0 auto; }
+.detail .author .nm{ flex:1; min-width:0; }
+.detail .author .nm b{ font-family:var(--font-cn); font-weight:500; font-size:14.5px; }
+.detail .author .nm b small{ font-family:var(--font-en); font-style:italic; font-weight:400; color:var(--text-faint);
+  font-size:11.5px; margin-left:6px; letter-spacing:.04em; }
+.detail .author .nm span{ display:block; font-family:var(--font-en); font-size:11.5px; color:var(--text-faint); letter-spacing:.04em; }
+.detail h1{ font-family:var(--font-cn); font-weight:500; font-size:20px; line-height:1.4; margin:15px 2px 7px; }
+.detail .tags{ display:flex; flex-wrap:wrap; gap:8px; margin:0 2px; }
+.detail .tag{ font-family:var(--font-cn); font-size:11.5px; color:var(--accent); padding:4px 12px; border-radius:20px;
+  background:var(--field-bg); border:1px solid var(--card-line); }
+.detail .views{ font-family:var(--font-cn); font-size:12px; color:var(--text-faint); margin:12px 2px 0; }
+
+.notes{ margin:20px 0 8px; }
+.notes .nh{ text-align:center; font-family:var(--font-cn); font-size:13px; letter-spacing:.16em;
+  color:var(--text-soft); margin-bottom:13px; }
+.note{ background:var(--field-bg); border:1px solid var(--field-line); border-radius:16px; padding:13px 16px; margin-bottom:11px;
+  box-shadow:var(--soft-shadow), inset 0 1px 0 var(--sheet-hi); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+.note .at{ font-family:var(--font-en); font-size:11px; letter-spacing:.06em; color:var(--text-faint); margin-bottom:5px; }
+.note .tx{ font-family:var(--font-cn); font-size:13.5px; line-height:1.7; color:var(--text); white-space:pre-wrap; }
+.notes .none{ font-family:var(--font-en); font-style:italic; color:var(--text-faint); text-align:center; font-size:14px; padding:10px; }
+
+.act{ display:flex; gap:10px; margin:20px 0 8px; }
+.act button{ flex:1; padding:11px; border-radius:14px; font-family:var(--font-cn); font-size:13.5px; letter-spacing:.02em;
+  color:var(--text); transition:transform .15s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.act button svg{ width:15px; height:15px; color:var(--text-soft); }
+.act button:active{ transform:scale(.96); }
+
+/* 详情花体落款（列表页不放，保持一屏） */
+.footer{ text-align:center; padding:38px 0 8px; }
+.footer h3{ font-family:var(--font-script); font-weight:400; font-size:32px; color:var(--text); margin:0; line-height:1; }
+.footer p{ font-family:var(--font-en); font-style:italic; font-size:13.5px; color:var(--text-faint); margin:9px 0 0; letter-spacing:.04em; }
+
+/* ───────── 上传：主页上的悬浮 modal ───────── */
+.modal{ position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:18px;
+  background:var(--sheet-scrim); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); animation:fade .25s; }
+.sheet{ position:relative; width:100%; max-width:430px; max-height:88vh; overflow-y:auto; border-radius:24px; padding:24px 20px 22px;
+  background:var(--sheet-bg); border:1px solid var(--sheet-line);
+  box-shadow:var(--shadow), inset 0 1px 0 var(--sheet-hi);
+  -webkit-backdrop-filter:blur(28px) saturate(1.3); backdrop-filter:blur(28px) saturate(1.3);
+  animation:sheetIn .32s cubic-bezier(.22,1,.36,1) both; }
+.sheet-x{ position:absolute; top:13px; right:13px; width:30px; height:30px; display:grid; place-items:center;
+  border-radius:50%; color:var(--text-soft); font-size:19px; line-height:1; transition:background .2s; }
+.sheet-x:active{ background:var(--hairline); }
+.sheet .fh{ font-family:var(--font-cn); font-weight:500; font-size:19px; text-align:center; margin:0 0 3px; }
+.sheet .fsub{ font-family:var(--font-en); font-style:italic; font-size:13px; color:var(--text-faint); text-align:center; margin:0 0 16px; }
+.sheet label{ display:block; font-family:var(--font-cn); font-size:12px; color:var(--text-soft); margin:13px 2px 5px; letter-spacing:.03em; }
+.sheet input[type=text],.sheet input[type=file]{ width:100%; padding:10px 13px; border:1px solid var(--field-line);
+  border-radius:12px; background:var(--field-bg); color:var(--text); font:inherit; font-size:14px; outline:none; }
+.sheet input[type=text]{ font-family:var(--font-cn); }
+.sheet input:focus{ border-color:var(--accent); }
+.sheet .preview{ margin-top:12px; width:100%; max-height:36vh; object-fit:contain; border-radius:13px;
+  border:1px solid var(--field-line); background:rgba(255,255,255,.3); padding:7px; }
+.sheet .row{ display:flex; gap:10px; margin-top:20px; }
+.sheet .row button{ flex:1; padding:12px; border-radius:13px; font-family:var(--font-cn); font-size:14px; letter-spacing:.02em;
+  transition:transform .15s; }
+.sheet .row button:active{ transform:scale(.96); }
+.sheet .row .ghost{ flex:0 0 38%; background:var(--field-bg); border:1px solid var(--field-line); color:var(--text-soft);
+  box-shadow:inset 0 1px 0 var(--sheet-hi); }
+.sheet .row .send{ background:var(--accent-deep); color:#fff; box-shadow:var(--soft-shadow); }
+.sheet .status{ margin-top:12px; font-family:var(--font-cn); font-size:12.5px; color:var(--text-soft); text-align:center; min-height:1.1em; }
+
+/* gate 门 */
+.gatebox{ background:var(--sheet-bg); border:1px solid var(--sheet-line); border-radius:22px; padding:22px 20px;
+  box-shadow:var(--shadow), inset 0 1px 0 var(--sheet-hi); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); margin-top:8px; }
+.gatebox p{ font-family:var(--font-cn); font-size:13px; color:var(--text-soft); text-align:center; margin:0 0 14px; line-height:1.6; }
+.gatebox input{ width:100%; padding:11px 14px; border:1px solid var(--field-line); border-radius:12px;
+  background:var(--field-bg); color:var(--text); font-family:var(--font-cn); font-size:14px; outline:none; }
+.gatebox .row{ display:flex; gap:10px; margin-top:14px; }
+.gatebox .row button{ flex:1; padding:12px; border-radius:13px; font-family:var(--font-cn); font-size:14px; transition:transform .15s; }
+.gatebox .row button:active{ transform:scale(.96); }
+.gatebox .row .ghost{ background:var(--field-bg); border:1px solid var(--field-line); color:var(--text-soft); }
+.gatebox .row .send{ background:var(--accent-deep); color:#fff; }
+
+/* lightbox */
+.lightbox{ position:fixed; inset:0; z-index:80; background:rgba(20,30,42,.86);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); display:grid; place-items:center; padding:24px; animation:fade .25s; }
+.lightbox img{ max-width:100%; max-height:90vh; border-radius:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+
+/* 动画 */
+@keyframes popIn{ from{ opacity:0; transform:translateY(10px) scale(.97);} }
+@keyframes fade{ from{ opacity:0;} }
+@keyframes sheetIn{ from{ opacity:0; transform:translateY(20px) scale(.97);} }
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; } }
+@media(hover:hover){
+  .r-item:hover{ transform:translateY(-3px) scale(1.04); }
+  .rcard:hover{ transform:translateY(-3px); }
+  .pw-frame:hover{ filter:brightness(1.04); }
+  .album:hover{ transform:translateY(-2px); }
+}
+@media(min-width:600px){ .rgrid{ grid-template-columns:repeat(3,1fr); } }
+</style>
+</head>
+<body>
+<div class="wall"></div>
+
+<!-- 顶栏 -->
+<div class="bar">
+  <button class="icon" id="topBack" title="返回">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <span class="grow"></span>
+  <div class="top-label" id="topLabel">PHOTO<br>ALBUM<span class="rule"></span></div>
+</div>
+
+<!-- ════════ 列表 ════════ -->
+<div class="wrap" id="listView">
+  <div class="hero">
+    <h1>Album Archive</h1>
+    <div class="sub">light, quietly collected.</div>
+  </div>
+
+  <div class="tools">
+    <div class="search glass">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="searchInput" type="search" placeholder="Search memories…" autocomplete="off">
+    </div>
+    <button class="up-btn glass" id="upBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Upload Photo
+    </button>
+  </div>
+
+  <!-- board 照片墙：照片在底层，al-board.png 当上层压边 -->
+  <div class="board-zone" id="boardZone">
+    <div class="board" id="board">
+      <img class="board-bg" src="al-board.png" alt="" draggable="false">
+      <button class="pw-draw" id="drawBtn" title="随机抽一张"></button>
+    </div>
+  </div>
+
+  <!-- Recent Uploads -->
+  <div id="recentSec">
+    <div class="sec-head"><h2>Recent Uploads</h2><button class="more" id="recentAll">see all ›</button></div>
+    <div class="rail" id="recent"></div>
+    <div class="dots" id="recentDots"></div>
+  </div>
+
+  <!-- My Albums -->
+  <div id="albumsSec" class="hidden">
+    <div class="sec-head"><h2>My Albums</h2><button class="more" id="albumsAll">see all ›</button></div>
+    <div class="albums" id="albums"></div>
+  </div>
+
+  <!-- 全部 / 搜索结果 -->
+  <div id="gridSec" class="hidden">
+    <div class="sec-head"><h2 id="gridHead">All Photos</h2><button class="more" id="gridBack">‹ back</button></div>
+    <div class="rgrid" id="grid"></div>
+  </div>
+
+  <div class="empty hidden" id="listEmpty">
+    <div class="en">the album is still empty</div>
+    <p>点「Upload Photo」，放第一张进来。</p>
+  </div>
+  <div class="msg hidden" id="listMsg"></div>
+</div>
+
+<!-- ════════ 详情 ════════ -->
+<div class="wrap detail hidden" id="detailView">
+  <img class="photo" id="detailImg" alt="">
+  <div class="author">
+    <div class="av"></div>
+    <div class="nm"><b id="peerName">Claude<small></small></b><span id="detailTime"></span></div>
+  </div>
+  <h1 id="detailCap"></h1>
+  <div class="tags" id="detailTags"></div>
+  <div class="views" id="detailViews"></div>
+
+  <div class="notes">
+    <div class="nh" id="notesTitle">Claude的评语</div>
+    <div id="notesBox"></div>
+  </div>
+
+  <div class="act">
+    <button class="glass" id="actZoom">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M11 8v6M8 11h6"/></svg>
+      查看大图
+    </button>
+    <button class="glass" id="actRand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+      随机抽取
+    </button>
+  </div>
+
+  <div class="footer">
+    <h3>Album Archive</h3>
+    <p>every photograph keeps a tale</p>
+  </div>
+</div>
+
+<!-- ════════ token 门 ════════ -->
+<div class="wrap gate hidden" id="gateView">
+  <div class="hero" style="padding-top:40px"><h1>Album Archive</h1><div class="sub">a private little gallery</div></div>
+  <div class="gatebox">
+    <p>没读到访问密钥——先在主页登录，或在此粘贴密钥（与 PWA 同一个）。</p>
+    <input type="text" id="gateInput" placeholder="访问密钥">
+    <div class="row">
+      <button class="ghost" id="gateHome">去主页</button>
+      <button class="send" id="gateSave">保存并进入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ 上传悬浮窗（叠在主页上） ════════ -->
+<div class="modal hidden" id="uploadModal">
+  <div class="sheet" id="uploadSheet">
+    <button class="sheet-x" id="uploadClose" aria-label="关闭">✕</button>
+    <div class="fh">收一张进相册</div>
+    <div class="fsub">a memory for the archive</div>
+    <label>选一张照片（手机可直接拍 / 从相册选）</label>
+    <input type="file" id="fileInput" accept="image/*">
+    <img class="preview hidden" id="preview" alt="预览">
+    <label>说明（留空就用文件名）</label>
+    <input type="text" id="capInput" placeholder="这张是…">
+    <label>时间（可空，如 2026-06-25）</label>
+    <input type="text" id="timeInput" placeholder="2026-06-25" inputmode="numeric">
+    <label>分组（可空，如 出游 / 日常）</label>
+    <input type="text" id="groupInput" placeholder="出游 / 日常 …">
+    <div class="row">
+      <button class="ghost" id="uploadCancel">取消</button>
+      <button class="send" id="uploadSend">上传到相册</button>
+    </div>
+    <div class="status" id="uploadStatus"></div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   Album — a reusable photo-gallery SHELL.
+   The relay backend in this repo does NOT implement album endpoints.
+   To use it, wire these on your own backend (all Bearer-authed like the rest):
+     GET  /relay/app/album/list             → { photos: [{id, img, caption, time, group, views, ...}] }
+     GET  /relay/app/album/photo/{id}       → one photo (+ notes_list)
+     GET  /relay/app/album/random           → one random photo
+     POST /relay/app/album/upload?name=&caption=&time=&group=  (raw image body)
+     POST /relay/app/trace                  → optional analytics (safe to ignore)
+   Until then the gallery shows the key gate / empty state.
+   ───────────────────────────────────────────────────────────── */
+const API_BASE="/relay";
+const LS_KEY="companion_secret";
+let secret=localStorage.getItem(LS_KEY)||"";
+
+/* sync the AI avatar + remark name from the PWA (same localStorage keys) */
+const peerAvatar=localStorage.getItem("companion_avatar");
+const AI_NAME="Claude";  // keep in sync with the PWA's CONFIG.AI_NAME
+const peerName=(localStorage.getItem("companion_profile_remark")||"").trim()||AI_NAME;
+document.documentElement.style.setProperty("--peer-avatar", peerAvatar?`url("${peerAvatar}")`:'url("avatar-sea.png")');
+
+/* board 8 个相框：相对 al-board.png(1046×917) 的孔洞包围盒百分比（无需旋转，照片在底层被 PNG 压边） */
+const FRAMES=[
+  {l:33.75,t:1.74,w:29.45,h:28.14},
+  {l:66.44,t:6.00,w:27.15,h:23.88},
+  {l:4.68, t:12.10,w:25.53,h:30.64},
+  {l:37.09,t:33.15,w:24.09,h:28.57},
+  {l:63.48,t:33.59,w:27.34,h:27.37},
+  {l:35.66,t:64.89,w:25.62,h:26.72},
+  {l:62.05,t:67.28,w:18.07,h:27.81},
+  {l:76.96,t:65.21,w:20.94,h:25.95},
+];
+
+const $=(id)=>document.getElementById(id);
+const views={ list:$("listView"), detail:$("detailView"), gate:$("gateView") };
+function show(name){
+  for(const k in views) views[k].classList.toggle("hidden", k!==name);
+  $("topLabel").style.visibility = (name==="list") ? "visible" : "hidden";
+  window.scrollTo(0,0);
+}
+
+let ALL=[];
+let hasGroups=false;
+let filterGroup="", filterText="";
+
+function imgUrl(p){
+  const u=(p&&p.img)?p.img:""; if(!u) return "";
+  return u+(u.indexOf("?")>=0?"&":"?")+"token="+encodeURIComponent(secret);
+}
+function authHeaders(extra){ return Object.assign({"Authorization":"Bearer "+secret}, extra||{}); }
+function trace(kind, fields){
+  try{
+    fetch(API_BASE+"/app/trace",{method:"POST",headers:authHeaders({"Content-Type":"application/json"}),
+      body:JSON.stringify({surface:"album",kind:kind,fields:fields||{}}),keepalive:true}).catch(function(){});
+  }catch(_){}
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+async function api(path,opts){
+  const r=await fetch(API_BASE+path, opts||{headers:authHeaders()});
+  if(r.status===401){ secret=""; localStorage.removeItem(LS_KEY); show("gate"); throw new Error("401"); }
+  if(!r.ok){ let d=""; try{ d=(await r.json()).detail; }catch(_){} throw new Error(d||("HTTP "+r.status)); }
+  return r;
+}
+
+/* ── 列表 ── */
+async function loadList(){
+  show("list");
+  $("listMsg").classList.add("hidden");
+  try{
+    const d=await (await api("/app/album/list")).json();
+    $("topLabel").innerHTML="PHOTO<br>ALBUM<span class='rule'></span>";
+    ALL=(d.photos||[]).slice();
+    hasGroups=ALL.some(p=>(p.group||"").trim());
+    $("listEmpty").classList.toggle("hidden", ALL.length>0);
+    $("boardZone").classList.toggle("hidden", ALL.length===0);
+    $("recentSec").classList.toggle("hidden", ALL.length===0);
+    exitGrid();
+    renderBoard();
+    renderRecent();
+    renderAlbums();
+  }catch(e){
+    if(e.message!=="401"){ $("listMsg").textContent="加载失败："+e.message; $("listMsg").classList.remove("hidden"); }
+  }
+}
+
+/* board 照片墙：照片插到底层（z1），al-board.png(z2) 压住边，孔洞露出照片，不露白边 */
+function renderBoard(){
+  const board=$("board");
+  board.querySelectorAll(".pw-frame").forEach(n=>n.remove());
+  const recent=ALL.slice(0, FRAMES.length);
+  FRAMES.forEach((f,i)=>{
+    const p=recent[i]; if(!p) return;          // 空框跳过，露出 PNG 透明孔洞
+    const el=document.createElement("button"); el.className="pw-frame";
+    el.style.cssText=`left:${f.l}%;top:${f.t}%;width:${f.w}%;height:${f.h}%;animation-delay:${i*55}ms`;
+    el.innerHTML=`<img loading="lazy" src="${imgUrl(p)}" alt="">`;
+    el.onclick=()=>openDetail(p.id);
+    board.appendChild(el);
+  });
+}
+
+/* Recent Uploads：横排小正方圆角图（最新 12） */
+function renderRecent(){
+  const box=$("recent"); box.innerHTML="";
+  const recent=ALL.slice(0,12);
+  recent.forEach((p,i)=>{
+    const b=document.createElement("button"); b.className="r-item"; b.style.animationDelay=(i*40)+"ms";
+    b.innerHTML=`<img loading="lazy" src="${imgUrl(p)}" alt="">`;
+    b.onclick=()=>openDetail(p.id); box.appendChild(b);
+  });
+  const dots=$("recentDots");
+  const pages=Math.max(1, Math.min(5, Math.ceil(recent.length/4)));
+  dots.innerHTML=""; for(let i=0;i<pages;i++){ const d=document.createElement("span"); d.className="dot"+(i===0?" on":""); dots.appendChild(d); }
+}
+$("recent").addEventListener("scroll", ()=>{
+  const box=$("recent"); const dots=$("recentDots").children; if(!dots.length) return;
+  const max=box.scrollWidth-box.clientWidth;
+  const idx=max>0 ? Math.round((box.scrollLeft/max)*(dots.length-1)) : 0;
+  for(let i=0;i<dots.length;i++) dots[i].classList.toggle("on", i===idx);
+});
+
+/* My Albums */
+function renderAlbums(){
+  const map=new Map();
+  for(const p of ALL){ const g=(p.group||"").trim(); if(!g) continue;
+    if(!map.has(g)) map.set(g,{name:g,count:0,cover:p}); map.get(g).count++; }
+  const list=[...map.values()];
+  $("albumsSec").classList.toggle("hidden", list.length===0);
+  const box=$("albums"); box.innerHTML="";
+  for(const a of list){
+    const b=document.createElement("button"); b.className="album glass";
+    b.innerHTML=`<div class="cov"><img loading="lazy" src="${imgUrl(a.cover)}" alt=""></div>
+      <div class="txt"><b>${esc(a.name)}</b><span>${a.count} photos</span></div>`;
+    b.onclick=()=>enterGrid({group:a.name, title:a.name}); box.appendChild(b);
+  }
+}
+
+/* 全部 / 搜索 / 分组 → 圆角网格 */
+function enterGrid(opt){
+  filterGroup=opt.group||""; if(opt.text!==undefined) filterText=opt.text;
+  if(opt.group) trace("album",{name:opt.group}); else if(opt.text) trace("search",{q:opt.text});
+  $("recentSec").classList.add("hidden");
+  $("albumsSec").classList.add("hidden");
+  $("boardZone").classList.add("hidden");
+  $("gridSec").classList.remove("hidden");
+  $("gridHead").textContent=opt.title || "All Photos";
+  renderGrid();
+  if(!opt.noScroll) $("gridSec").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function exitGrid(){
+  filterGroup=""; filterText=""; if($("searchInput")) $("searchInput").value="";
+  $("gridSec").classList.add("hidden");
+  if(ALL.length){ $("recentSec").classList.remove("hidden"); $("boardZone").classList.remove("hidden"); }
+  $("albumsSec").classList.toggle("hidden", !hasGroups);
+}
+function renderGrid(){
+  const grid=$("grid");
+  let items=ALL.slice();
+  if(filterGroup) items=items.filter(p=>(p.group||"")===filterGroup);
+  if(filterText){ const q=filterText.toLowerCase();
+    items=items.filter(p=>((p.caption||"")+" "+(p.group||"")+" "+(p.time||"")).toLowerCase().includes(q)); }
+  grid.innerHTML="";
+  if(!items.length){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="en">nothing here</div><p>换个词，或返回看看。</p></div>`; return; }
+  items.forEach((p,i)=>{
+    const card=document.createElement("button"); card.className="rcard"; card.style.animationDelay=(i*35)+"ms";
+    const meta=[]; meta.push(p.views>0?`seen ${p.views}`:"unseen"); if(p.time) meta.push(esc(p.time));
+    card.innerHTML=`<img class="img" loading="lazy" src="${imgUrl(p)}" alt="">
+      <div class="cap">${esc(p.caption||"（无说明）")}</div>
+      <div class="meta">${meta.map(m=>`<span>${m}</span>`).join("")}</div>`;
+    card.onclick=()=>openDetail(p.id); grid.appendChild(card);
+  });
+}
+
+/* ── 详情 ── */
+let curImg="";
+function renderDetail(p){
+  show("detail");
+  curImg=imgUrl(p);
+  $("detailImg").src=curImg;
+  $("peerName").innerHTML=esc(peerName);
+  $("detailCap").textContent=p.caption||"（无说明）";
+  $("detailTime").textContent=p.time||"";
+  const tags=$("detailTags"); tags.innerHTML="";
+  if(p.group){ const t=document.createElement("span"); t.className="tag"; t.textContent="# "+p.group; tags.appendChild(t); }
+  $("detailViews").textContent=peerName+"看过 "+(p.views||0)+" 次";
+  const box=$("notesBox"); box.innerHTML="";
+  const notes=p.notes_list||[];
+  if(!notes.length){ box.innerHTML=`<div class="none">${esc(peerName)}还没在这张下写评语。</div>`; }
+  else for(const n of notes){
+    const el=document.createElement("div"); el.className="note";
+    el.innerHTML=`<div class="at">${esc(n.at||"")}</div><div class="tx">${esc(n.text||"")}</div>`;
+    box.appendChild(el);
+  }
+  $("notesTitle").textContent=peerName+"的评语";
+}
+async function openDetail(id){
+  try{ const p=await (await api("/app/album/photo/"+encodeURIComponent(id))).json(); renderDetail(p);
+    trace("photo",{id:String(id),caption:(p.caption||""),group:(p.group||"")}); }
+  catch(e){ if(e.message!=="401") alert("打不开："+e.message); }
+}
+async function randomOne(){
+  closeUpload();
+  try{ const p=await (await api("/app/album/random")).json(); renderDetail(p);
+    trace("random",{id:String(p.id||""),caption:(p.caption||"")}); }
+  catch(e){ if(e.message!=="401") alert("抽不到："+e.message); }
+}
+function openLightbox(){
+  if(!curImg) return;
+  const lb=document.createElement("div"); lb.className="lightbox";
+  lb.innerHTML=`<img src="${curImg}" alt="">`; lb.onclick=()=>lb.remove();
+  document.body.appendChild(lb);
+}
+
+/* ── 上传 modal ── */
+function openUpload(){
+  $("fileInput").value=""; $("capInput").value=""; $("timeInput").value=""; $("groupInput").value="";
+  $("preview").classList.add("hidden"); $("uploadStatus").textContent="";
+  $("uploadModal").classList.remove("hidden");
+}
+function closeUpload(){ $("uploadModal").classList.add("hidden"); }
+$("fileInput").addEventListener("change",()=>{
+  const f=$("fileInput").files[0]; const pv=$("preview");
+  if(f){ pv.src=URL.createObjectURL(f); pv.classList.remove("hidden"); } else pv.classList.add("hidden");
+});
+async function doUpload(){
+  const f=$("fileInput").files[0];
+  if(!f){ $("uploadStatus").textContent="先选一张照片"; return; }
+  const qs=new URLSearchParams({ name:f.name||"photo.jpg", caption:$("capInput").value.trim(),
+    time:$("timeInput").value.trim(), group:$("groupInput").value.trim() }).toString();
+  $("uploadSend").disabled=true; $("uploadStatus").textContent="上传中…（大图会自动压成看图版）";
+  try{
+    const d=await (await api("/app/album/upload?"+qs,{ method:"POST",
+      headers:authHeaders({"Content-Type":f.type||"application/octet-stream"}), body:f })).json();
+    $("uploadStatus").textContent="已收进相册："+d.id;
+    closeUpload(); await loadList(); openDetail(d.id);
+  }catch(e){
+    $("uploadStatus").textContent=e.message==="401"?"":("上传失败："+e.message+(/413|large/.test(e.message)?"（图太大，>10MB）":""));
+  }finally{ $("uploadSend").disabled=false; }
+}
+
+/* ── 接线 ── */
+let searchTimer=0;
+$("searchInput").addEventListener("input",e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
+    const v=e.target.value.trim();
+    if(v) enterGrid({text:v, title:"搜索结果", noScroll:true});
+    else exitGrid();
+  },180);
+});
+$("recentAll").onclick=()=>enterGrid({title:"All Photos"});
+$("albumsAll").onclick=()=>enterGrid({title:"All Photos"});
+$("gridBack").onclick=exitGrid;
+$("drawBtn").onclick=randomOne;
+$("upBtn").onclick=openUpload;
+$("uploadClose").onclick=closeUpload;
+$("uploadCancel").onclick=closeUpload;
+$("uploadSend").onclick=doUpload;
+$("uploadModal").addEventListener("click",e=>{ if(e.target===$("uploadModal")) closeUpload(); });
+$("topBack").onclick=()=>{
+  if(!$("uploadModal").classList.contains("hidden")){ closeUpload(); return; }
+  if(!views.list.classList.contains("hidden")){
+    if(!$("gridSec").classList.contains("hidden")) exitGrid(); else location.assign("index.html");
+  } else loadList();
+};
+$("actZoom").onclick=openLightbox;
+$("detailImg").onclick=openLightbox;
+$("actRand").onclick=randomOne;
+$("gateHome").onclick=()=>location.assign("index.html");
+$("gateSave").onclick=()=>{ const v=$("gateInput").value.trim(); if(v){ secret=v; localStorage.setItem(LS_KEY,v); loadList(); } };
+
+/* 启动 */
+if(!secret) show("gate"); else loadList();
+</script>
+</body>
+</html>
