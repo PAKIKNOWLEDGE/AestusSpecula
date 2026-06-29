@@ -23,11 +23,11 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 
 <script>
-  /* Theme: two presets (light=Pearl / harbor). Persisted in localStorage companion_theme. Set data-theme early to avoid a first-paint flash. */
+  /* Theme: two presets (light=Pearl / harbor). Persisted in localStorage aestus_theme. Set data-theme early to avoid a first-paint flash. */
   (function(){
     var THEMES = ["light","harbor"];
     try{
-      var t = localStorage.getItem("companion_theme");
+      var t = localStorage.getItem("aestus_theme");
       if (THEMES.indexOf(t) < 0) t = "light";
       document.documentElement.setAttribute("data-theme", t);
     }catch(e){ document.documentElement.setAttribute("data-theme", "light"); }
@@ -1681,10 +1681,10 @@
 <body>
 
 <!-- ── Login ── -->
-<div class="login" id="login">
+<div class="login" id="login" style="display:none">
   <div class="orb"></div>
-  <h1>Claude</h1>
-  <p class="sub">输入连接密钥,进入你和Claude的频道。</p>
+  <h1>AI</h1>
+  <p class="sub">输入连接密钥,进入你和AI的频道。</p>
   <form id="loginForm" autocomplete="off">
     <input id="secretInput" type="password" inputmode="text" placeholder="连接密钥" autocomplete="off" spellcheck="false">
     <button type="submit">连接</button>
@@ -1700,14 +1700,17 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
     <div class="peerpill">
-      <span class="name" id="peerName">Claude</span>
+      <span class="name" id="peerName">AI</span>
       <span class="status" id="status">connecting…</span>
     </div>
-    <div class="header-actions" aria-label="通话和更多操作">
-      <button class="topbtn call" id="callBtn" type="button" aria-label="语音通话（占位）" title="语音通话">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v2.4a2 2 0 0 1-2.2 2 19.4 19.4 0 0 1-8.4-3 19 19 0 0 1-5.9-5.9 19.4 19.4 0 0 1-3-8.4A2 2 0 0 1 4.5 2h2.4a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.4a15.6 15.6 0 0 0 6.6 6.6l1-1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 1.8z"/></svg>
+    <div class="header-actions" aria-label="更多">
+      <button class="topbtn" id="convBtn" type="button" aria-label="会话列表" title="会话列表">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
-      <button class="topbtn more" id="moreBtn" type="button" aria-label="个人信息" title="个人信息">
+      <button class="topbtn" id="settingsBtn" type="button" aria-label="设置" title="设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="topbtn" id="moreBtn" type="button" aria-label="更多" title="更多">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
       </button>
     </div>
@@ -1716,7 +1719,7 @@
   <main class="scroll" id="scroll">
     <div class="empty" id="empty">
       <div class="orb"></div>
-      <p>这里只有你和Claude。<br>说点什么吧。</p>
+      <p>这里只有你和AI。<br>说点什么吧。</p>
     </div>
   </main>
   <footer class="composer">
@@ -1758,8 +1761,8 @@
         <button class="profile-avatar" id="profileAvatarBtn" type="button" aria-label="更改头像"></button>
         <div class="profile-id-copy">
           <div class="profile-name-row">
-            <h3 id="profileName">Claude</h3>
-            <input id="profileNameInput" class="hidden" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Claude">
+            <h3 id="profileName">AI</h3>
+            <input id="profileNameInput" class="hidden" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="AI">
             <button class="profile-name-edit" id="profileNameEdit" type="button" aria-label="编辑备注">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
             </button>
@@ -1780,7 +1783,7 @@
 
       <!-- 锁屏通知 -->
       <section class="settings-card">
-        <div class="settings-label">锁屏通知 <i class="info-i" title="Claude发消息、而你没在看时，推送到手机锁屏">i</i></div>
+        <div class="settings-label">锁屏通知 <i class="info-i" title="AI发消息、而你没在看时，推送到手机锁屏">i</i></div>
         <div class="segmented" id="pushSeg" role="group" aria-label="锁屏通知开关">
           <button type="button" data-val="off">关</button>
           <button type="button" data-val="on">开</button>
@@ -1856,6 +1859,33 @@
           </span>
         </span>
       </div>
+
+      <!-- ── Aestus 专属功能 ── -->
+      <div class="settings-section-title" style="font-size:11px;color:var(--text-soft,#888);text-transform:uppercase;letter-spacing:.05em;padding:12px 0 4px 0">Aestus Specula</div>
+      <button class="action-row" onclick="closeProfilePanel();openSettings()" type="button">
+        <span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+        <span class="action-name">设置</span>
+        <span class="action-value">LLM / AI / 城市 / 主动</span>
+        <span class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="action-row" onclick="closeProfilePanel();toggleConvPanel()" type="button">
+        <span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+        <span class="action-name">会话</span>
+        <span class="action-value">切换 / 新建对话</span>
+        <span class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="action-row" onclick="closeProfilePanel();PwaBridge.serviceAction('trigger');showToast('已触发')" type="button">
+        <span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+        <span class="action-name">触发主动</span>
+        <span class="action-value">手动执行一次主动检查</span>
+        <span class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="action-row" onclick="closeProfilePanel();bridgeClearHistory();showToast('已清空')" type="button" style="color:#e88">
+        <span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></span>
+        <span class="action-name">清空对话</span>
+        <span class="action-value">删除当前全部消息</span>
+        <span class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
     </div>
     <input type="file" id="avatarInput" accept="image/*" class="hidden">
   </div>
@@ -1939,11 +1969,11 @@
     <div class="call-avatar-stage">
       <div class="call-vu call-vu-left" id="callVuLeft" aria-hidden="true"></div>
       <div class="call-avatar-ring" id="callAvatarRing">
-        <div class="call-avatar-img" id="callAvatarImg" role="img" aria-label="Claude"></div>
+        <div class="call-avatar-img" id="callAvatarImg" role="img" aria-label="AI"></div>
       </div>
       <div class="call-vu call-vu-right" id="callVuRight" aria-hidden="true"></div>
     </div>
-    <div class="call-name">Claude</div>
+    <div class="call-name">AI</div>
     <div class="call-status">
       <span class="call-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 5 3.5 7.7 8.5 8.5-5 .8-7.7 3.5-8.5 8.5-.8-5-3.5-7.7-8.5-8.5 5-.8 7.7-3.5 8.5-8.5Z"/></svg></span>
       <span id="callCaptionText">on call</span>
@@ -1990,9 +2020,9 @@
       <span>incoming call</span>
       <span class="call-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 5 3.5 7.7 8.5 8.5-5 .8-7.7 3.5-8.5 8.5-.8-5-3.5-7.7-8.5-8.5 5-.8 7.7-3.5 8.5-8.5Z"/></svg></span>
     </div>
-    <div class="incoming-call-avatar" role="img" aria-label="Claude"></div>
-    <div class="incoming-call-title">Claude来电</div>
-    <div class="incoming-call-text" id="incomingCallText">Claude想和你语音通话。</div>
+    <div class="incoming-call-avatar" role="img" aria-label="AI"></div>
+    <div class="incoming-call-title">AI来电</div>
+    <div class="incoming-call-text" id="incomingCallText">AI想和你语音通话。</div>
     <div class="incoming-call-actions">
       <div class="incoming-call-slot">
         <button class="incoming-call-btn decline" id="incomingCallDecline" type="button" aria-label="拒绝">
@@ -2041,11 +2071,31 @@ const CONFIG = {
   HUMAN_NAME: "你",
   SINCE:      "",
 };
-const AI_NAME = CONFIG.AI_NAME, HUMAN_NAME = CONFIG.HUMAN_NAME, APP_NAME = CONFIG.APP_NAME;
+var AI_NAME = CONFIG.AI_NAME, HUMAN_NAME = CONFIG.HUMAN_NAME, APP_NAME = CONFIG.APP_NAME;
+
+/* ════════════ 动态名字（Bridge 实时注入）═══════════ */
+function refreshNames() {
+  try {
+    const cfg = JSON.parse(PwaBridge.getConfig());
+    if (cfg.aiName) {
+      CONFIG.AI_NAME = cfg.aiName;
+      AI_NAME = cfg.aiName;  // eslint-disable-line no-global-assign
+    }
+    if (cfg.humanName) {
+      CONFIG.HUMAN_NAME = cfg.humanName;
+      HUMAN_NAME = cfg.humanName;
+    }
+    // Update DOM elements
+    const el = $('#peerName'); if (el) el.textContent = AI_NAME;
+    const pn = $('#profileName'); if (pn) pn.textContent = AI_NAME;
+    const pi = $('#profileNameInput'); if (pi) pi.placeholder = AI_NAME;
+    document.title = AI_NAME + ' · ' + APP_NAME;
+  } catch(_) {}
+}
 
 const API_BASE = "";              // same-origin; relay serves both static & API on the same host
 const USE_MOCK  = false;
-const LS_KEY    = "companion_secret";
+const LS_KEY    = "aestus_secret";
 
 /* ── 状态 ── */
 let secret  = localStorage.getItem(LS_KEY);
@@ -2059,16 +2109,16 @@ let backfillTimer = null;
 let lastStreamEventAt = 0;
 let backfillInFlight = false;
 const STREAM_STALE_MS = 45000;
-const BACKFILL_MS = 20000;
+const BACKFILL_MS = 3000;
 let typingTimer = null;
 let typingActive = false;
 const freshKeys = new Set();   // 刚发/刚收到、待播一次入场动画的消息 key
 const freshReactionKeys = new Set();   // messages whose AI reaction just arrived, pending a one-shot pop
 // messages you deleted locally (view only; never touches the server); persisted so refresh/backfill won't bring them back
 const deletedKeys = new Set();
-try{ (JSON.parse(localStorage.getItem("companion_deleted_ids") || "[]") || []).forEach((k) => deletedKeys.add(String(k))); }catch(_){}
+try{ (JSON.parse(localStorage.getItem("aestus_del") || "[]") || []).forEach((k) => deletedKeys.add(String(k))); }catch(_){}
 function persistDeletedKeys(){
-  try{ localStorage.setItem("companion_deleted_ids", JSON.stringify(Array.from(deletedKeys).slice(-5000))); }catch(_){}
+  try{ localStorage.setItem("aestus_del", JSON.stringify(Array.from(deletedKeys).slice(-5000))); }catch(_){}
 }
 
 /* ── DOM ── */
@@ -2183,6 +2233,7 @@ function closeProfile(){
   clearTimeout(profileCloseTimer);
   profileCloseTimer = setTimeout(() => profilePanel.classList.add("hidden"), 360);
 }
+function closeProfilePanel(){ closeProfile(); }
 
 try{ localStorage.removeItem("companion_bg"); }catch(e){}
 applyIdentity();
@@ -2247,7 +2298,7 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshDays(); });
 
 /* 设置页 #themeSeg 分段控件 — 手动切 5 套主题,持久化,联动壁纸/theme-color */
-const THEME_KEY = "companion_theme";
+const THEME_KEY = "aestus_theme";
 const themeSeg = $("#themeSeg");
 function syncThemeSeg(){
   if (!themeSeg) return;
@@ -3155,12 +3206,7 @@ function mergeServerHistoryCache(msgs){
 }
 async function apiHistory({ since = 0, beforeId = null, latest = false, limit = 200 } = {}){
   if (USE_MOCK) return Mock.history({ since, beforeId, latest, limit });
-  ensureServerHistoryCache();
-  const params = new URLSearchParams({ since: String(since || 0), limit: String(limit) });
-  const r = await fetch(`${API_BASE}/app/history?${params.toString()}`, { headers: authHeaders() });
-  if (r.status === 401){ handle401(); throw new Error("401"); }
-  if (!r.ok) throw new Error("history " + r.status);
-  const msgs = (await r.json()).messages || [];
+  const msgs = JSON.parse(PwaBridge.getHistory(limit));
   mergeServerHistoryCache(msgs);
   return msgs;
 }
@@ -3209,16 +3255,8 @@ async function apiNewerHistory(since, limit = 200){
 
 async function apiSend(text, attachments){
   if (USE_MOCK) return Mock.send(text);
-  const payload = { text: text || "" };
-  if (attachments && attachments.length) payload.attachments = attachments;
-  const r = await fetch(`${API_BASE}/app/send`, {
-    method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if (r.status === 401){ handle401(); throw new Error("401"); }
-  if (!r.ok) throw new Error("send " + r.status);
-  return await r.json();
+  const result = JSON.parse(PwaBridge.sendMessage(text || ""));
+  return result;
 }
 
 async function apiUpload(blob, name, mime){
@@ -4386,6 +4424,41 @@ function onMessage(m){
   if (!stick && m.from === "ai" && m.kind !== "thinking" && m.kind !== "act") showNewMsgPill();  // user is reading history: don't yank them down, just show "↓ new message" at the bottom
 }
 
+/* ════════════ native bridge (Android → PWA) ════════════ */
+function bridgeAddMessage(jsonStr){
+  try{ onMessage(JSON.parse(jsonStr)); }catch(err){}
+}
+function bridgeClearHistory(){
+  try{ PwaBridge.clearMessages(); }catch(e){}
+  resetChatState();
+  hasMoreOlder = false;
+  serverHistoryComplete = true;
+  invalidateRows();
+  chatMessages = [];
+  seen.clear();
+  lastId = 0;
+  renderVirtualList({stickToBottom:true});
+}
+function bridgeReloadHistory(){
+  resetChatState();
+  try{
+    var msgs=JSON.parse(PwaBridge.getHistory(50));
+    msgs.forEach(function(x){ seen.add(msgKey(x.id)); setMessage({...x,status:'sent'},{render:false,cache:false}) });
+    renderVirtualList({stickToBottom:true});
+  }catch(e){}
+}
+function bridgeClearHistory(){
+  try{ PwaBridge.clearMessages(); }catch(e){}
+  resetChatState();
+  hasMoreOlder = false;
+  serverHistoryComplete = true;
+  invalidateRows();
+  chatMessages = [];
+  seen.clear();
+  lastId = 0;
+  renderVirtualList({stickToBottom:true});
+}
+
 function backfill(){
   if (backfillInFlight) return;
   backfillInFlight = true;
@@ -4886,44 +4959,25 @@ $("#loginForm").addEventListener("submit", async (e) => {
   btn.disabled = true; btn.textContent = "连接中…";
   secret = val;
   try{
-    // 用 history 验证密钥(401 会抛错)
-    const msgs = await apiLatestHistory();
+    const msgs = JSON.parse(PwaBridge.getHistory(50));
     localStorage.setItem(LS_KEY, secret);
     startChat(msgs);
   }catch(err){
     secret = null;
-    if (String(err.message) !== "401") $("#loginErr").textContent = "连不上,稍后再试。";
+    $("#loginErr").textContent = "连不上,稍后再试。";
   }finally{
     btn.disabled = false; btn.textContent = "连接";
   }
 });
 
-/* ════════════ 启动 ════════════ */
+// ════════════ 自动启动（无 relay 模式）════════════
+// (handled by init() below)
+
+/* ════════════ 启动（无 relay 模式）══*/
 function startRealtime(){
-  openStream();
-
-  if (streamWatchTimer) clearInterval(streamWatchTimer);
-  streamWatchTimer = setInterval(() => {
-    if (document.hidden || USE_MOCK || !secret) return;
-    if (!lastStreamEventAt || Date.now() - lastStreamEventAt <= STREAM_STALE_MS) return;
-    connected = false;
-    setConn("reconnecting");
-    openStream();
-    backfill();
-  }, 10000);
-
-  if (backfillTimer) clearInterval(backfillTimer);
-  backfillTimer = setInterval(() => {
-    if (!document.hidden && secret) backfill();
-  }, BACKFILL_MS);
-
-  // healthz 兜底:stream 没连上时也能反映在线/离线
-  if (healthTimer) clearInterval(healthTimer);
-  healthTimer = setInterval(async () => {
-    if (connected) return;
-    const ok = await apiHealth();
-    setConn(ok ? "reconnecting" : "offline");
-  }, 25000);
+  // SSE disconnected; bridge handles push
+  connected = true;
+  setConn("online");
 }
 function startChat(initialMsgs, { connect = true, fromCache = false } = {}){
   loginEl.classList.add("hidden");
@@ -4946,27 +5000,18 @@ function startChat(initialMsgs, { connect = true, fromCache = false } = {}){
 }
 
 async function init(){
-  if (!secret){ showLogin(); return; }
-  let showedCache = false;
-  const cached = await readCachedMessages();
-  if (cached.length){
-    startChat(cached, { connect:false, fromCache:true });
-    showedCache = true;
-  }
-  try{
-    const msgs = await apiLatestHistory();
-    if (showedCache){
-      hasMoreOlder = true;
-      mergeHistoryMessages(msgs, { stickToBottom:true });
-      startRealtime();
-    }else{
-      startChat(msgs);
-    }
-  }catch(err){
-    if (String(err.message) !== "401" && !showedCache) showLogin("连不上,请确认密钥。");
-    else if (showedCache) startRealtime();
+  try {
+    const msgs = JSON.parse(PwaBridge.getHistory(50));
+    startChat(msgs);
+    refreshNames();
+  } catch(err) {
+    startChat([], { connect:true });
+    setConn("offline");
+    showToast("Bridge未就绪: " + err.message);
   }
 }
+
+/* ════════════ 引导流程 ════════════ */
 
 /* 回前台重同步:iOS 后台会挂起连接 */
 document.addEventListener("visibilitychange", () => {
@@ -5043,6 +5088,193 @@ if ("serviceWorker" in navigator){
 }
 
 init();
+</script>
+
+<div class="conv-panel" id="convPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg,rgba(20,20,30,0.92));z-index:100;overflow-y:auto">
+  <div style="padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:1.1rem;font-weight:600">会话列表</span>
+      <button onclick="closeConvPanel()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text,#eee)" aria-label="关闭">✕</button>
+    </div>
+    <div id="convList"></div>
+    <button onclick="createAndSwitch()" style="width:100%;margin-top:12px;padding:10px;border:1px dashed var(--border,rgba(200,200,200,0.3));background:transparent;border-radius:8px;cursor:pointer;color:var(--text,#eee);font-size:0.9rem">+ 新建对话</button>
+  </div>
+</div>
+
+<style>
+.conv-item{display:flex;align-items:center;padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;transition:background 0.15s}
+.conv-item:hover{background:rgba(255,255,255,0.08)}
+.conv-item.active{background:rgba(100,150,255,0.2);font-weight:600}
+.conv-item .title{flex:1}
+.conv-item .del{background:none;border:none;color:var(--text-muted,#999);cursor:pointer;font-size:0.8rem;padding:4px 8px;border-radius:4px}
+.conv-item .del:hover{background:rgba(255,80,80,0.2);color:#f55}
+</style>
+
+<script>
+/* ════════════ 会话面板 ════════════ */
+var convOpen = false;
+
+function toggleConvPanel(){
+  convOpen ? closeConvPanel() : openConvPanel();
+}
+
+function openConvPanel(){
+  convOpen = true;
+  var el = document.getElementById('convPanel');
+  el.style.display = 'block';
+  renderConvList();
+}
+
+function closeConvPanel(){
+  convOpen = false;
+  document.getElementById('convPanel').style.display = 'none';
+}
+
+function renderConvList(){
+  try {
+    var list = JSON.parse(PwaBridge.listConversations());
+    var currentId = PwaBridge.getConv();
+    var html = '';
+    for(var i = 0; i < list.length; i++){
+      var c = list[i];
+      var active = c.id === currentId ? ' active' : '';
+      html += '<div class="conv-item' + active + '" onclick="selectConv(' + c.id + ')">';
+      html += '<span class="title">' + (c.title || '会话 #' + c.id) + '</span>';
+      if(c.id > 1) html += '<button class="del" onclick="event.stopPropagation();deleteConv(' + c.id + ')">✕</button>';
+      html += '</div>';
+    }
+    document.getElementById('convList').innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--text-muted,#888)">暂无会话</div>';
+  } catch(e) {}
+}
+
+function selectConv(id){
+  PwaBridge.setConv(id);
+  closeConvPanel();
+  bridgeReloadHistory();
+}
+
+function createAndSwitch(){
+  var r = JSON.parse(PwaBridge.createConversation('新对话'));
+  closeConvPanel();
+  bridgeReloadHistory();
+}
+
+function deleteConv(id){
+  if(!confirm('删除此会话及其所有消息？')) return;
+  PwaBridge.deleteConversation(id);
+  renderConvList();
+}
+
+/* Wire up conv + settings buttons */
+document.addEventListener('DOMContentLoaded', function(){
+  var b=document.getElementById('convBtn');if(b)b.addEventListener('click',function(e){e.stopPropagation();toggleConvPanel();});
+  var s=document.getElementById('settingsBtn');if(s)s.addEventListener('click',function(e){e.stopPropagation();openSettings();});
+});
+</script>
+
+<!-- ═══ Settings Panel ═══ -->
+<div class="settings-panel" id="settingsPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg,rgba(20,20,30,0.95));z-index:100;overflow-y:auto">
+  <div style="padding:20px;max-width:520px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <span style="font-size:1.2rem;font-weight:600">设置</span>
+      <button onclick="closeSettings()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text,#eee)" aria-label="关闭">✕</button>
+    </div>
+
+    <div class="settings-section" style="margin-bottom:20px;padding:16px;border-radius:12px;background:rgba(155,180,218,0.1);border:1px solid rgba(165,188,230,0.2)">
+      <h3 style="font-size:1rem;margin-bottom:14px;color:var(--text,#eee)">LLM 配置</h3>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">API Key</label>
+        <input type="password" id="s-llmApiKey" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">API Base URL</label>
+        <input id="s-llmApiBase" value="https://api.deepseek.com/v1" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">模型</label>
+        <input id="s-llmModel" value="deepseek-v4-flash" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+    </div>
+
+    <div class="settings-section" style="margin-bottom:20px;padding:16px;border-radius:12px;background:rgba(155,180,218,0.1);border:1px solid rgba(165,188,230,0.2)">
+      <h3 style="font-size:1rem;margin-bottom:14px;color:var(--text,#eee)">AI 配置</h3>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">AI 名称</label>
+        <input id="s-aiName" value="AI" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">你的名称</label>
+        <input id="s-humanName" value="你" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">城市（用于天气）</label>
+        <input id="s-cityName" placeholder="如：北京" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <label style="display:block;font-size:0.82rem;color:var(--text-muted,#999);margin-bottom:4px">主动间隔（秒，默认900）</label>
+        <input id="s-proactiveInterval" value="900" type="number" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box">
+      </div>
+    </div>
+
+    <div class="settings-section" style="margin-bottom:20px;padding:16px;border-radius:12px;background:rgba(155,180,218,0.1);border:1px solid rgba(165,188,230,0.2)">
+      <h3 style="font-size:1rem;margin-bottom:14px;color:var(--text,#eee)">System Prompt（可选）</h3>
+      <textarea id="s-systemPrompt" rows="4" placeholder="留空使用默认：名称+用户名称" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(165,188,230,0.25);background:rgba(255,255,255,0.06);color:var(--text,#eee);font-size:0.88rem;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
+    </div>
+
+    <div class="settings-actions" style="display:flex;gap:12px;flex-wrap:wrap">
+      <button onclick="saveAndStart()" style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--accent,#5080b0);color:#fff;font-size:0.95rem;cursor:pointer;font-weight:500">保存并启动</button>
+      <button onclick="PwaBridge.serviceAction('stop');closeSettings()" style="padding:12px;border:1px solid rgba(165,188,230,0.3);border-radius:10px;background:transparent;color:var(--text,#eee);font-size:0.9rem;cursor:pointer">停止</button>
+      <button onclick="PwaBridge.serviceAction('trigger');showToast('手动触发已发送')" style="padding:12px;border:1px solid rgba(165,188,230,0.3);border-radius:10px;background:transparent;color:var(--text,#eee);font-size:0.9rem;cursor:pointer">触发主动</button>
+      <button onclick="bridgeClearHistory();showToast('已清空');" style="padding:12px;border:1px solid rgba(165,188,230,0.3);border-radius:10px;background:transparent;color:var(--text,#eee);font-size:0.9rem;cursor:pointer">清空历史</button>
+    </div>
+
+    <div style="margin-top:20px">
+      <button onclick="loadSettings()" style="background:none;border:none;color:var(--text-muted,#888);font-size:0.8rem;cursor:pointer">↻ 刷新</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════ 设置面板 ════════════ */
+function openSettings(){
+  document.getElementById('settingsPanel').style.display = 'block';
+  loadSettings();
+}
+function closeSettings(){ document.getElementById('settingsPanel').style.display = 'none'; }
+function loadSettings(){
+  try {
+    var cfg = JSON.parse(PwaBridge.getFullConfig());
+    setField('s-llmApiKey', cfg.llmApiKey || '');
+    setField('s-llmApiBase', cfg.llmApiBase || 'https://api.deepseek.com/v1');
+    setField('s-llmModel', cfg.llmModel || 'deepseek-v4-flash');
+    setField('s-aiName', cfg.aiName || 'AI');
+    setField('s-humanName', cfg.humanName || '你');
+    setField('s-cityName', cfg.cityName || '');
+    setField('s-systemPrompt', cfg.systemPrompt || '');
+    setField('s-proactiveInterval', String(cfg.proactiveInterval || 900));
+  } catch(e){ showToast('加载配置失败: ' + e.message); }
+}
+function saveAndStart(){
+  try {
+    var c = {
+      llmApiKey: getField('s-llmApiKey'),
+      llmApiBase: getField('s-llmApiBase') || 'https://api.deepseek.com/v1',
+      llmModel: getField('s-llmModel') || 'deepseek-v4-flash',
+      aiName: getField('s-aiName') || 'AI',
+      humanName: getField('s-humanName') || '你',
+      cityName: getField('s-cityName'),
+      systemPrompt: getField('s-systemPrompt'),
+      proactiveInterval: parseInt(getField('s-proactiveInterval')) || 900,
+    };
+    PwaBridge.saveConfig(JSON.stringify(c));
+    PwaBridge.serviceAction('config_saved');
+    refreshNames();
+    closeSettings();
+    showToast('已保存并启动');
+  } catch(e){ showToast('保存失败: ' + e.message); }
+}
+function setField(id, v){ var e=document.getElementById(id); if(e) e.value = v; }
+function getField(id){ var e=document.getElementById(id); return e ? e.value : ''; }
 </script>
 
 </body>

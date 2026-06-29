@@ -1,0 +1,7 @@
+# Pinned to a known-good set (Python 3.10+).
+# pywebpush + py-vapid are only needed if you enable lock-screen push;
+# they're harmless to install regardless (the relay degrades gracefully).
+fastapi==0.137.1
+uvicorn==0.49.0
+pywebpush==2.3.0
+py-vapid==1.9.4

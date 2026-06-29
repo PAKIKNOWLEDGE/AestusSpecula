@@ -8,3 +8,19 @@
 .externalNativeBuild
 .cxx
 /app/build
+
+# Secrets (API keys, passwords)
+.env
+dev/.env
+dev/*.env
+
+# Dev runtime data
+dev/relay.db
+dev/relay.db-*
+dev/uploads/
+dev/bridge_state/
+dev/__pycache__/
+
+# Python
+__pycache__/
+*.pyc

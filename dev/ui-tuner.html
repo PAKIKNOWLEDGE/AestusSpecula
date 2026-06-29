@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UI Tuner - Aestus Specula</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#ddd;font-family:sans-serif;display:flex;flex-wrap:wrap;min-height:100vh;padding:10px;gap:12px;align-items:flex-start;justify-content:center}
+@media(min-width:800px){body{flex-wrap:nowrap;padding:20px;gap:20px}}
+.preview{flex:1;background:#1a1a2e;border-radius:16px;max-width:420px;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;position:relative;width:100%}
+/* page tabs */
+.page-tabs{display:flex;gap:2px;padding:10px 10px 0;background:#1a1a2e}
+.page-tabs button{padding:6px 14px;border:0;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;background:rgba(255,255,255,0.04);color:#888;transition:all.15s}
+.page-tabs button.active{background:rgba(80,128,176,0.2);color:#eee;font-weight:500}
+.page-pane{display:none}
+.page-pane.active{display:flex;flex-direction:column}
+/* Header */
+.phone-header{display:flex;align-items:center;justify-content:center;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.08);position:relative;min-height:52px;gap:var(--hd-gap,8px)}
+.phone-back{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:var(--btn-s,34px);height:var(--btn-s,34px);border-radius:50%;border:0;background:transparent;color:var(--tx,#ddd);cursor:pointer;display:grid;place-items:center;font-size:18px}
+.phone-name{text-align:center;font-size:var(--name-s,17px);font-weight:500;padding:0 var(--name-p,60px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--tx,#ddd)}
+.phone-name small{display:block;font-size:var(--stat-s,11px);font-weight:400;color:var(--tx-m,#999);margin-top:1px}
+.phone-actions{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:var(--hd-gap,8px)}
+.phone-btn{width:var(--btn-s,34px);height:var(--btn-s,34px);border-radius:50%;border:0;background:transparent;color:var(--tx,#ddd);cursor:pointer;display:grid;place-items:center;font-size:15px}
+/* Messages */
+.msgs{padding:12px;flex:1;min-height:180px;display:flex;flex-direction:column;gap:var(--msg-gap,6px)}
+.msg{max-width:var(--msg-w,82%);padding:var(--msg-p,10px) 14px;border-radius:var(--msg-r,12px);font-size:var(--msg-s,14px);line-height:1.6;color:var(--tx,#ddd);animation:fadeUp .25s ease}
+.msg.user{background:var(--bub-user,rgba(80,128,176,0.35));align-self:flex-end;border-bottom-right-radius:4px}
+.msg.ai{background:var(--bub-ai,rgba(255,255,255,0.08));align-self:flex-start;border-bottom-left-radius:4px}
+.msg.system{text-align:center;font-size:var(--stat-s,12px);color:var(--tx-m,#888);max-width:100%;background:none;padding:12px}
+.msg .time{font-size:var(--t-s,10px);color:var(--tx-m,#777);margin-top:4px;display:block;text-align:right}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* Input bar */
+.input-bar{display:flex;align-items:flex-end;gap:var(--inp-gap,8px);padding:10px;border-top:1px solid rgba(255,255,255,0.08)}
+.input-bar textarea{flex:1;padding:var(--inp-p,10px) 14px;border-radius:var(--inp-r,20px);border:1px solid rgba(165,188,230,0.2);background:rgba(255,255,255,0.06);color:var(--tx,#ddd);font-size:var(--inp-s,14px);outline:none;resize:none;font-family:inherit;min-height:40px;height:var(--inp-h,40px)}
+.input-bar button{width:var(--inp-btn,40px);height:var(--inp-btn,40px);border-radius:var(--inp-btn-r,50%);border:0;background:var(--accent,#5080b0);color:#fff;cursor:pointer;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.input-bar .att{background:transparent;color:var(--tx-m,#888)}
+/* Settings panel (inline preview) */
+.settings-body{padding:14px;overflow-y:auto;flex:1}
+.scard{border-radius:var(--card-r,12px);padding:var(--card-p,16px);margin-bottom:14px;background:rgba(155,180,218,var(--card-bg,0.1));border:1px solid rgba(165,188,230,var(--card-border,0.2))}
+.scard h3{font-size:var(--card-h,15px);margin-bottom:12px;color:var(--tx,#ddd)}
+.sf{margin-bottom:10px}
+.sf label{display:block;font-size:var(--lbl-s,12px);color:var(--tx-m,#999);margin-bottom:3px}
+.sf input{width:100%;padding:var(--inp-p2,9px) 12px;border-radius:var(--inp-r2,8px);border:1px solid rgba(165,188,230,0.22);background:rgba(255,255,255,0.05);color:var(--tx,#ddd);font-size:var(--inp-s2,13px);outline:none}
+.sf textarea{width:100%;padding:var(--inp-p2,9px) 12px;border-radius:var(--inp-r2,8px);border:1px solid rgba(165,188,230,0.22);background:rgba(255,255,255,0.05);color:var(--tx,#ddd);font-size:var(--inp-s2,13px);outline:none;resize:vertical;font-family:inherit}
+.sact{display:flex;gap:var(--act-g,8px);flex-wrap:wrap;margin-top:4px}
+.sact button{flex:1;min-width:78px;padding:var(--act-p,10px);border:none;border-radius:var(--act-r,8px);font-size:13px;cursor:pointer;min-height:40px}
+.sact .p{background:var(--accent,#5080b0);color:#fff}
+.sact .s{border:1px solid rgba(165,188,230,0.25);background:transparent;color:var(--tx,#ddd)}
+/* Conv overlay */
+.conv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(10,10,20,0.93);z-index:100;overflow-y:auto;display:none}
+.conv-overlay.show{display:block}
+.conv-inner{padding:20px;max-width:400px;margin:0 auto}
+.conv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.conv-head span{font-size:var(--conv-h-s,16px);font-weight:600;color:var(--tx,#ddd)}
+.conv-head button{background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx,#ddd)}
+.conv-item{display:flex;align-items:center;padding:var(--conv-p,10px) 14px;border-radius:var(--conv-r,8px);cursor:pointer;margin-bottom:4px;color:var(--tx,#ddd);font-size:var(--conv-s,13px)}
+.conv-item:hover{background:rgba(255,255,255,0.05)}
+.conv-item.active{background:rgba(80,128,176,0.18);font-weight:600}
+.conv-item .del{margin-left:auto;background:none;border:none;color:var(--tx-m,#888);cursor:pointer;font-size:11px;padding:4px}
+.conv-add{width:100%;margin-top:10px;padding:var(--conv-p,10px);border:1px dashed rgba(165,188,230,0.25);background:transparent;border-radius:var(--conv-r,8px);cursor:pointer;color:var(--tx,#ddd);font-size:var(--conv-s,13px)}
+/* Controls */
+.controls{width:100%;max-width:420px;flex-shrink:0;overflow-y:auto;max-height:100vh;background:#1a1a2e;border-radius:16px;padding:16px;margin:0 auto}@media(min-width:800px){.controls{width:380px;max-width:none;padding:20px}}
+.controls h2{font-size:15px;margin-bottom:12px;color:var(--tx,#eee)}
+.cg{margin-bottom:16px}
+.cg h3{font-size:12px;color:#999;font-weight:400;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,0.05);text-transform:uppercase;letter-spacing:.05em}
+.sr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.sr label{width:88px;font-size:11px;color:#bbb;flex-shrink:0}
+.sr input[type=range]{flex:1;accent-color:#5080b0;height:3px}
+.sr .v{width:34px;text-align:right;font-size:11px;color:#999;font-family:monospace}
+.clr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.clr label{width:88px;font-size:11px;color:#bbb;flex-shrink:0}
+.clr input[type=color]{width:30px;height:30px;border:none;border-radius:5px;cursor:pointer;background:none;padding:0}
+.copy-btn{width:100%;padding:9px;background:#5080b0;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;margin-top:8px}
+.copy-btn:active{opacity:.7}
+</style>
+</head>
+<body>
+<div class="preview">
+  <div class="page-tabs">
+    <button class="active" onclick="switchPage('chat')">💬 聊天</button>
+    <button onclick="switchPage('settings')">⚙ 设置</button>
+    <button onclick="switchPage('conv')">☰ 会话</button>
+  </div>
+
+  <!-- Chat page -->
+  <div class="page-pane active" id="pageChat">
+    <div class="phone-header">
+      <div class="phone-name"><span id="pn">小汐</span><small id="ps">online</small></div>
+      <div class="phone-actions">
+        <button class="phone-btn" onclick="document.getElementById('convOverlay').classList.toggle('show')">☰</button>
+        <button class="phone-btn">⚙</button>
+        <button class="phone-btn">⋮</button>
+      </div>
+    </div>
+    <div class="msgs">
+      <div class="msg ai">哈喽~今天心情怎么样呀？(◕‿◕)</div>
+      <div class="msg user">还不错！今天天气很好 ☀️</div>
+      <div class="msg ai">那太好了！出去走走晒晒太阳呀～<span class="time">14:32</span></div>
+      <div class="msg user">嗯嗯，准备去公园溜达一圈</div>
+      <div class="msg system">—— 以上为最近消息 ——</div>
+    </div>
+    <div class="input-bar">
+      <button class="phone-btn att" style="position:static;transform:none">📎</button>
+      <textarea rows="1" placeholder="写点什么…">今天天气不错</textarea>
+      <button>↑</button>
+    </div>
+  </div>
+
+  <!-- Settings page -->
+  <div class="page-pane" id="pageSettings">
+    <div class="phone-header"><div class="phone-name"><span>⚙ 设置</span></div></div>
+    <div class="settings-body">
+      <div class="scard">
+        <h3>LLM 配置</h3>
+        <div class="sf"><label>API Key</label><input value="sk-xxxxxxxxxxxxxxxx"></div>
+        <div class="sf"><label>API Base URL</label><input value="https://api.deepseek.com/v1"></div>
+        <div class="sf"><label>模型</label><input value="deepseek-v4-flash"></div>
+      </div>
+      <div class="scard">
+        <h3>AI 配置</h3>
+        <div class="sf"><label>AI 名称</label><input value="小汐"></div>
+        <div class="sf"><label>你的名称</label><input value="你"></div>
+        <div class="sf"><label>城市</label><input placeholder="如：北京"></div>
+        <div class="sf"><label>主动间隔（秒）</label><input value="900"></div>
+      </div>
+      <div class="scard">
+        <h3>System Prompt</h3>
+        <textarea rows="3" placeholder="留空使用默认">你是小汐，正在和你私聊。</textarea>
+      </div>
+      <div class="sact">
+        <button class="p">保存并启动</button>
+        <button class="s">停止</button>
+        <button class="s">触发</button>
+        <button class="s">清空</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conv overlay inside preview -->
+  <div class="conv-overlay show" id="convOverlay">
+    <div class="conv-inner">
+      <div class="conv-head"><span>会话列表</span><button onclick="document.getElementById('convOverlay').classList.remove('show')">✕</button></div>
+      <div class="conv-item active"><span>💬 日常闲聊</span><button class="del">✕</button></div>
+      <div class="conv-item"><span>💬 工作讨论</span><button class="del">✕</button></div>
+      <div class="conv-item"><span>💬 深夜话题</span><button class="del">✕</button></div>
+      <div class="conv-item"><span>📝 学习笔记</span><button class="del">✕</button></div>
+      <button class="conv-add">+ 新建对话</button>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <h2>🎨 UI Tuner</h2>
+
+  <div class="cg"><h3>头部 Header</h3>
+    <div class="sr"><label>按钮间距</label><input type="range" id="hdGap" min="0" max="36" value="8"><span class="v">8</span></div>
+    <div class="sr"><label>按钮大小</label><input type="range" id="btnS" min="24" max="50" value="34"><span class="v">34</span></div>
+    <div class="sr"><label>名字留白</label><input type="range" id="nameP" min="20" max="140" value="60"><span class="v">60</span></div>
+    <div class="sr"><label>名字字号</label><input type="range" id="nameS" min="14" max="28" value="17"><span class="v">17</span></div>
+    <div class="sr"><label>状态字号</label><input type="range" id="statS" min="9" max="18" value="11"><span class="v">11</span></div>
+  </div>
+
+  <div class="cg"><h3>消息气泡 Messages</h3>
+    <div class="sr"><label>间距</label><input type="range" id="msgGap" min="2" max="24" value="6"><span class="v">6</span></div>
+    <div class="sr"><label>最大宽度</label><input type="range" id="msgW" min="55" max="95" value="82"><span class="v">82%</span></div>
+    <div class="sr"><label>内边距</label><input type="range" id="msgP" min="4" max="24" value="10"><span class="v">10</span></div>
+    <div class="sr"><label>圆角</label><input type="range" id="msgR" min="4" max="24" value="12"><span class="v">12</span></div>
+    <div class="sr"><label>字体</label><input type="range" id="msgS" min="11" max="22" value="14"><span class="v">14</span></div>
+    <div class="sr"><label>时间字号</label><input type="range" id="tS" min="8" max="16" value="10"><span class="v">10</span></div>
+    <div class="clr"><label>用户气泡</label><input type="color" id="bubUser" value="#5080b0"></div>
+    <div class="sr"><label>用户透明</label><input type="range" id="bubUserA" min="0.1" max="0.7" step="0.01" value="0.35"><span class="v">0.35</span></div>
+    <div class="clr"><label>AI 气泡</label><input type="color" id="bubAi" value="#ffffff"></div>
+    <div class="sr"><label>AI透明</label><input type="range" id="bubAiA" min="0.03" max="0.3" step="0.01" value="0.08"><span class="v">0.08</span></div>
+  </div>
+
+  <div class="cg"><h3>输入栏 Input</h3>
+    <div class="sr"><label>圆角</label><input type="range" id="inpR" min="4" max="28" value="20"><span class="v">20</span></div>
+    <div class="sr"><label>高度</label><input type="range" id="inpH" min="32" max="56" value="40"><span class="v">40</span></div>
+    <div class="sr"><label>内边距</label><input type="range" id="inpP" min="6" max="20" value="10"><span class="v">10</span></div>
+    <div class="sr"><label>字号</label><input type="range" id="inpS" min="12" max="20" value="14"><span class="v">14</span></div>
+    <div class="sr"><label>发送钮大小</label><input type="range" id="inpBtn" min="28" max="52" value="40"><span class="v">40</span></div>
+    <div class="sr"><label>按钮圆角</label><input type="range" id="inpBtnR" min="20" max="50" value="50"><span class="v">50</span></div>
+  </div>
+
+  <div class="cg"><h3>设置面板 Settings</h3>
+    <div class="sr"><label>卡片圆角</label><input type="range" id="cardR" min="0" max="24" value="12"><span class="v">12</span></div>
+    <div class="sr"><label>卡片内边距</label><input type="range" id="cardP" min="8" max="28" value="16"><span class="v">16</span></div>
+    <div class="sr"><label>卡片标题字号</label><input type="range" id="cardH" min="12" max="22" value="15"><span class="v">15</span></div>
+    <div class="sr"><label>卡片背景透明</label><input type="range" id="cardBg" min="0.02" max="0.3" step="0.01" value="0.1"><span class="v">0.1</span></div>
+    <div class="sr"><label>卡片边框透明</label><input type="range" id="cardBorder" min="0.05" max="0.5" step="0.01" value="0.2"><span class="v">0.2</span></div>
+    <div class="sr"><label>输入框圆角</label><input type="range" id="inpR2" min="4" max="20" value="8"><span class="v">8</span></div>
+    <div class="sr"><label>输入框字号</label><input type="range" id="inpS2" min="11" max="18" value="13"><span class="v">13</span></div>
+    <div class="sr"><label>输入框内边距</label><input type="range" id="inpP2" min="6" max="18" value="9"><span class="v">9</span></div>
+    <div class="sr"><label>标签字号</label><input type="range" id="lblS" min="10" max="16" value="12"><span class="v">12</span></div>
+    <div class="sr"><label>按钮间距</label><input type="range" id="actG" min="4" max="18" value="8"><span class="v">8</span></div>
+    <div class="sr"><label>按钮内边距</label><input type="range" id="actP" min="6" max="20" value="10"><span class="v">10</span></div>
+    <div class="sr"><label>按钮圆角</label><input type="range" id="actR" min="4" max="20" value="8"><span class="v">8</span></div>
+  </div>
+
+  <div class="cg"><h3>会话卡片 Conv</h3>
+    <div class="sr"><label>列表项圆角</label><input type="range" id="convR" min="4" max="20" value="8"><span class="v">8</span></div>
+    <div class="sr"><label>内边距</label><input type="range" id="convP" min="6" max="20" value="10"><span class="v">10</span></div>
+    <div class="sr"><label>字体</label><input type="range" id="convS" min="12" max="18" value="13"><span class="v">13</span></div>
+    <div class="sr"><label>标题字号</label><input type="range" id="convHS" min="14" max="22" value="16"><span class="v">16</span></div>
+  </div>
+
+  <div class="cg"><h3>颜色 Colors</h3>
+    <div class="clr"><label>主文字</label><input type="color" id="tx" value="#dddddd"></div>
+    <div class="clr"><label>次要文字</label><input type="color" id="txM" value="#999999"></div>
+    <div class="clr"><label>强调色</label><input type="color" id="accent" value="#5080b0"></div>
+  </div>
+
+  <button class="copy-btn" onclick="copyParams()">📋 复制参数</button>
+</div>
+
+<script>
+function switchPage(name){
+  document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+  document.querySelector(`.page-tabs button:nth-child(${name==='chat'?1:name==='settings'?2:3})`).classList.add('active');
+}
+function apply(){
+  const g=id=>document.getElementById(id), v=id=>g(id).value, p=(id,unit)=>{document.documentElement.style.setProperty('--'+id,v(id)+(unit||'px'));g(id).nextElementSibling.textContent=v(id)+(unit||'')};
+  p('hdGap');p('btnS');p('nameP');p('nameS');p('statS');
+  p('msgGap');p('msgW','%');p('msgP');p('msgR');p('msgS');p('tS');
+  const bu=v('bubUser'),ba=v('bubAi'),bua=v('bubUserA'),baa=v('bubAiA');
+  document.documentElement.style.setProperty('--bub-user',`rgba(${parseInt(bu.slice(1,3),16)},${parseInt(bu.slice(3,5),16)},${parseInt(bu.slice(5,7),16)},${bua})`);
+  document.documentElement.style.setProperty('--bub-ai',`rgba(${parseInt(ba.slice(1,3),16)},${parseInt(ba.slice(3,5),16)},${parseInt(ba.slice(5,7),16)},${baa})`);
+  p('inpR');p('inpH');p('inpP');p('inpS');p('inpBtn');p('inpBtnR');
+  p('cardR');p('cardP');p('cardH');p('cardBg');p('cardBorder');p('inpR2');p('inpS2');p('inpP2');p('lblS');p('actG');p('actP');p('actR');
+  p('convR');p('convP');p('convS');p('convHS');
+  document.documentElement.style.setProperty('--accent',v('accent'));
+  document.documentElement.style.setProperty('--tx',v('tx'));document.documentElement.style.setProperty('--tx-m',v('txM'));
+}
+function copyParams(){
+  const ids=['hdGap','btnS','nameP','nameS','statS','msgGap','msgW','msgP','msgR','msgS','tS','bubUser','bubUserA','bubAi','bubAiA','inpR','inpH','inpP','inpS','inpBtn','inpBtnR','cardR','cardP','cardH','cardBg','cardBorder','inpR2','inpS2','inpP2','lblS','actG','actP','actR','convR','convP','convS','convHS','tx','txM','accent'];
+  const o={};ids.forEach(id=>{const e=document.getElementById(id);if(e)o[id]=e.value});
+  navigator.clipboard.writeText(JSON.stringify(o,null,2));
+  document.querySelector('.copy-btn').textContent='✅ 已复制';setTimeout(()=>document.querySelector('.copy-btn').textContent='📋 复制参数',2000);
+}
+document.querySelectorAll('.sr input, .clr input').forEach(el=>el.addEventListener('input',apply));
+apply();
+</script>
+</body>
+</html>

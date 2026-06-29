@@ -14,7 +14,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 
 class ProactiveService : Service() {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var engine: Engine? = null
 
     override fun onCreate() {
@@ -24,8 +23,15 @@ class ProactiveService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            stopEngine()
+            AppLog.d("Svc", "ACTION_STOP")
+            engine?.stop()
+            engine = null
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
+            return START_NOT_STICKY
+        }
+        if (intent?.action == ACTION_TRIGGER) {
+            engine?.triggerNow()
             return START_NOT_STICKY
         }
         try {
@@ -35,11 +41,11 @@ class ProactiveService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        scope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 startEngine()
             } catch (e: Exception) {
-                Log.e(TAG, "startEngine failed", e)
+                AppLog.e("Svc", "startEngine failed", e)
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
@@ -48,6 +54,10 @@ class ProactiveService : Service() {
     }
 
     private suspend fun startEngine() {
+        AppLog.d("Svc", "startEngine begin")
+        engine?.stop()
+        engine = null
+
         val repo = ConfigRepository(this@ProactiveService)
         val cfg = repo.config.first()
         if (cfg.llmApiKey.isBlank()) {
@@ -58,41 +68,30 @@ class ProactiveService : Service() {
         val db = Database(this@ProactiveService)
         val mcp = McpTools(this@ProactiveService).also { it.init() }
         val memory = MemoryManager(db)
-        val relay = LocalRelayServer(
-            assetManager = assets,
-            db = db,
-            configRepo = repo,
-        )
-        val actualPort = relay.start()
-        Log.i(TAG, "Relay started on port $actualPort")
-        engine = Engine(repo, db, mcp, memory, relay).also { it.start() }
-    }
-
-    private fun stopEngine() {
-        engine?.stop()
-        engine = null
+        engine = Engine(repo, db, mcp, memory).also { it.start() }
+        AppLog.d("Svc", "startEngine done")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        stopEngine()
-        scope.cancel()
+        AppLog.d("Svc", "onDestroy")
+        engine?.stop()
+        engine = null
         super.onDestroy()
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID, "Aestus Specula",
-            NotificationManager.IMPORTANCE_LOW
-        ).apply { description = "后台主动消息服务" }
-        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        val ch = NotificationChannel(CHANNEL_ID, "Aestus", NotificationManager.IMPORTANCE_LOW).apply {
+            description = "后台服务"
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
     }
 
     private fun buildNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Aestus Specula")
-            .setContentText("后台运行中")
+            .setContentText("运行中")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -100,24 +99,28 @@ class ProactiveService : Service() {
     }
 
     companion object {
-        const val TAG = "AestusService"
-        const val CHANNEL_ID = "aestus_service"
+        const val TAG = "Aestus"
+        const val CHANNEL_ID = "aestus"
         const val NOTIFICATION_ID = 1001
         const val ACTION_STOP = "me.rerere.aestus.STOP"
+        const val ACTION_TRIGGER = "me.rerere.aestus.TRIGGER"
 
-        fun start(context: Context) {
-            val intent = Intent(context, ProactiveService::class.java)
+        fun start(ctx: Context) {
+            val i = Intent(ctx, ProactiveService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                context.startForegroundService(intent)
+                ctx.startForegroundService(i)
             else
-                context.startService(intent)
+                ctx.startService(i)
         }
 
-        fun stop(context: Context) {
-            val intent = Intent(context, ProactiveService::class.java).apply {
-                action = ACTION_STOP
-            }
-            context.startService(intent)
+        fun stop(ctx: Context) {
+            val i = Intent(ctx, ProactiveService::class.java).apply { action = ACTION_STOP }
+            ctx.startService(i)
+        }
+
+        fun trigger(ctx: Context) {
+            val i = Intent(ctx, ProactiveService::class.java).apply { action = ACTION_TRIGGER }
+            ctx.startService(i)
         }
     }
 }
